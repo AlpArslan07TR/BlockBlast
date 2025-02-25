@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class BlockDragHandler : MonoBehaviour
 {
@@ -13,12 +14,16 @@ public class BlockDragHandler : MonoBehaviour
     
     private static Dictionary<Vector3Int, bool> occupiedCells = new Dictionary<Vector3Int, bool>();
 
-    private List<Vector3Int> currentBlockCells = new List<Vector3Int>(); 
-    
+    private List<Vector3Int> currentBlockCells = new List<Vector3Int>();
+    private Tilemap tilemap;
+    private BoundsInt gridBounds;
 
     private void Start()
     {
         grid = FindObjectOfType<Grid>();
+        tilemap = FindObjectOfType<Tilemap>();
+
+        gridBounds = tilemap.cellBounds;
         originalPosition = transform.position;
         mainCamera = Camera.main;
         blockScaler = GetComponent<BlockSpawnScaler>();
@@ -59,6 +64,11 @@ public class BlockDragHandler : MonoBehaviour
         bool isValidPosition = true;
         foreach (var cell in newBlockCells)
         {
+            if (!IsInsideGridBounds(cell))
+            {
+                isValidPosition = false;
+                break;
+            }
             if (occupiedCells.ContainsKey(cell)) 
             {
                 isValidPosition = false;
@@ -116,7 +126,10 @@ public class BlockDragHandler : MonoBehaviour
         Vector3Int cellPosition = grid.WorldToCell(transform.position);
         transform.position = grid.GetCellCenterWorld(cellPosition);
     }
-
+    private bool IsInsideGridBounds(Vector3Int cell)
+    {
+        return gridBounds.Contains(cell);
+    }
     private Vector3 GetMouseWorldPosition()
     {
         Vector3 mousePosition = Input.mousePosition;
