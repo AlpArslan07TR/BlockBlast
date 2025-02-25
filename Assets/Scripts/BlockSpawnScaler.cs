@@ -13,7 +13,7 @@ public class BlockSpawnScaler : MonoBehaviour
     {
 
         originalScale = Vector3.one;
-        targetScale = originalScale * 1.1f;
+        targetScale = originalScale * 1.05f;
         transform.localScale = originalScale * 0.8f;
     }
 

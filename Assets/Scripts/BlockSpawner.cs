@@ -5,24 +5,32 @@ using UnityEngine;
 public class BlockSpawner : MonoBehaviour
 {
     public GameObject[] blockPrefabs;  
-    public Transform[] spawnPoint;    
+    public Transform[] spawnPoints;
 
+    private Dictionary<Transform, GameObject> activeBlocks = new Dictionary<Transform, GameObject>();
     void Start()
     {
         SpawnBlocks();
     }
 
-    void SpawnBlocks()
+    public void SpawnBlocks()
     {
-        for (int i = 0; i < spawnPoint.Length; i++)
+        foreach (Transform spawnPoint in spawnPoints)
         {
-            int randomIndex = Random.Range(0, blockPrefabs.Length);
-
-            
-            GameObject spawnedBlock = Instantiate(blockPrefabs[randomIndex], spawnPoint[i].position, Quaternion.identity);
-
-            
-            spawnedBlock.transform.SetParent(spawnPoint[i]);
+            if (!activeBlocks.ContainsKey(spawnPoint) || activeBlocks[spawnPoint] == null)
+            {
+                SpawnBlockAt(spawnPoint);
+            }
         }
+    }
+    public void SpawnBlockAt(Transform spawnPoint)
+    {
+        int randomIndex = Random.Range(0, blockPrefabs.Length);
+        GameObject spawnedBlock = Instantiate(blockPrefabs[randomIndex], spawnPoint.position, Quaternion.identity);
+
+        
+        spawnedBlock.GetComponent<BlockDragHandler>().SetSpawnPoint(spawnPoint);
+
+        activeBlocks[spawnPoint] = spawnedBlock;
     }
 }

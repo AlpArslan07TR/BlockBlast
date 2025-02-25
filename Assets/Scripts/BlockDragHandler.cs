@@ -11,9 +11,12 @@ public class BlockDragHandler : MonoBehaviour
     private Vector3 originalPosition;
     private Camera mainCamera;
     private BlockSpawnScaler blockScaler;
-    
-    private static Dictionary<Vector3Int, bool> occupiedCells = new Dictionary<Vector3Int, bool>();
+    private Transform spawnPoint;
+    private SpriteRenderer spriteRenderer;
+    private int originalSortingOrder;
 
+
+    private static Dictionary<Vector3Int, bool> occupiedCells = new Dictionary<Vector3Int, bool>();
     private List<Vector3Int> currentBlockCells = new List<Vector3Int>();
     private Tilemap tilemap;
     private BoundsInt gridBounds;
@@ -27,6 +30,17 @@ public class BlockDragHandler : MonoBehaviour
         originalPosition = transform.position;
         mainCamera = Camera.main;
         blockScaler = GetComponent<BlockSpawnScaler>();
+
+        spriteRenderer = GetComponent<SpriteRenderer>(); 
+        if (spriteRenderer != null)
+        {
+            originalSortingOrder = spriteRenderer.sortingOrder;
+        }
+    }
+
+    public void SetSpawnPoint(Transform point)
+    {
+        spawnPoint = point; 
     }
 
     private void OnMouseDown()
@@ -46,6 +60,11 @@ public class BlockDragHandler : MonoBehaviour
             {
                 occupiedCells.Remove(cell);
             }
+        }
+
+        foreach (SpriteRenderer renderer in GetComponentsInChildren<SpriteRenderer>())
+        {
+            renderer.sortingOrder += 500; // En üste çýkar
         }
     }
 
@@ -87,6 +106,11 @@ public class BlockDragHandler : MonoBehaviour
             
             SnapToGrid(); 
             originalPosition = transform.position;
+
+            if (spawnPoint != null)
+            {
+                FindObjectOfType<BlockSpawner>().SpawnBlockAt(spawnPoint);
+            }
         }
         else 
         {
@@ -103,7 +127,14 @@ public class BlockDragHandler : MonoBehaviour
         {
             blockScaler.OnMouseUp();
         }
+
+        foreach (SpriteRenderer renderer in GetComponentsInChildren<SpriteRenderer>())
+        {
+            renderer.sortingOrder -= 500;
+        }
     }
+    
+    
     private List<Vector3Int> GetOccupiedCells()
     {
         List<Vector3Int> cells = new List<Vector3Int>();
